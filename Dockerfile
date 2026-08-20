@@ -45,7 +45,7 @@ RUN python -m pip install --upgrade pip && \
 COPY . /app
 
 # entrypoint ausführbar machen (robust, auch wenn Datei ggf. fehlt)
-RUN chmod +x /app/entrypoint.sh || true
+RUN sed -i 's/\r$//' /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
 # ----- Laufzeit-Defaults -----
 ENV PORT=8000 \
