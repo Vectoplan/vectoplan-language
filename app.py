@@ -212,6 +212,15 @@ def _register_request_hooks(app: Flask) -> None:
         except Exception:
             # Response-Modifikation ist optional
             _LOG.warning("annotate_response_failed", exc_info=True)
+        resp.headers.setdefault("X-Content-Type-Options", "nosniff")
+        resp.headers.setdefault("Referrer-Policy", "no-referrer")
+        resp.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+        resp.headers.setdefault("X-Frame-Options", "DENY")
+        resp.headers.setdefault("X-Permitted-Cross-Domain-Policies", "none")
+        resp.headers.setdefault(
+            "Content-Security-Policy",
+            "default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'",
+        )
         return resp
 
     @app.teardown_request
