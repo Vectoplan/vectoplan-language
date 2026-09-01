@@ -1,0 +1,40 @@
+name: Publish VECTOPLAN Update Source
+
+on:
+  push:
+    tags: ["vectoplan-*-v*"]
+  workflow_dispatch:
+
+concurrency:
+  group: update-source-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out immutable source and tags
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Publish source release in this repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view "${RELEASE_TAG}" >/dev/null 2>&1; then
+            echo "Release ${RELEASE_TAG} already exists."
+            exit 0
+          fi
+          gh release create "${RELEASE_TAG}" \
+            --verify-tag \
+            --title "${GITHUB_REPOSITORY#*/} ${RELEASE_TAG}" \
+            --generate-notes
+
